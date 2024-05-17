@@ -18,11 +18,11 @@ import ButtonTab from "./components/ButtonTab";
 
 export default function App() {
   const [weatherData, setWeatherData] = useState(null);
-  const [activeTab, setActiveTab] = useState('Today');
+  const [activeTab, setActiveTab] = useState("Today");
 
   useEffect(() => {
     fetch(
-      "http://api.weatherapi.com/v1/forecast.json?key=d22d0081a3db440b964164153241305&q=Paris&days=2&aqi=no&alerts=no"
+      "http://api.weatherapi.com/v1/forecast.json?key=d22d0081a3db440b964164153241305&q=Paris&days=10&aqi=no&alerts=no"
     )
       .then((res) => {
         return res.json();
@@ -33,12 +33,13 @@ export default function App() {
       });
   }, []);
 
-  function getCurrentDayFormattedData() {
+  function getDayFormattedData() {
     const now = new Date();
     let hoursArray = [];
-    weatherData.forecast.forecastday[0].hour.forEach((hour) => {
+    const dayIndex = activeTab === "Today" ? 0 : 1;
+    weatherData.forecast.forecastday[dayIndex].hour.forEach((hour) => {
       const date = new Date(hour.time);
-      if (date.getHours() >= now.getHours()) {
+      if (dayIndex || date.getHours() >= now.getHours()) {
         hoursArray.push({
           temp: hour.temp_c.toFixed(),
           icon: hour.condition.icon,
@@ -50,8 +51,18 @@ export default function App() {
 
     return {
       datetimeNow: now,
-      hours: hoursArray
+      windSpeed: weatherData.forecast.forecastday[dayIndex].day.avgvis_km.toFixed(),
+      rainChance: weatherData.forecast.forecastday[dayIndex].day.daily_chance_of_rain,
+      pressure: weatherData.current.pressure_mb.toFixed(),
+      uv: weatherData.forecast.forecastday[dayIndex].day.uv,
+      hours: hoursArray,
     };
+  }
+
+  let activeDay = null;
+  if (weatherData !== null ) {
+    activeDay = getDayFormattedData();
+    console.log(activeDay);
   }
 
   return (
@@ -85,8 +96,10 @@ export default function App() {
             </div>
             <div className="flex justify-between items-end">
               <div className="relative">
-                <span className="text-9xl">{weatherData.current.temp_c.toFixed()}°</span>
-                <span className="absolute bottom-[13px] left-[130px] w-full">
+                <span className="text-9xl">
+                  {weatherData.current.temp_c.toFixed()}°
+                </span>
+                <span className="w-full whitespace-nowrap ml-[-40px]">
                   Feels like {weatherData.current.feelslike_c.toFixed()}°
                 </span>
               </div>
@@ -96,7 +109,9 @@ export default function App() {
                   alt=""
                   className="flex w-full absolute top-0 left-4"
                 />
-                <span className="text-right">{weatherData.current.condition.text}</span>
+                <span className="text-right">
+                  {weatherData.current.condition.text}
+                </span>
               </div>
             </div>
             <p>
@@ -106,42 +121,50 @@ export default function App() {
           </section>
           <section className="flex flex-col gap-4 p-4">
             <nav className="grid grid-cols-3 gap-4">
-              <ButtonTab label="Today" isActive={activeTab === "Today"} onSelectTab={() => setActiveTab("Today")} />
-              <ButtonTab label="Tomorrow" isActive={activeTab === "Tomorrow"} onSelectTab={() => setActiveTab("Tomorrow")} />
-              <ButtonTab label="10 days" isActive={activeTab === "10 days"} onSelectTab={() => setActiveTab("10 days")} />
+              <ButtonTab
+                label="Today"
+                isActive={activeTab === "Today"}
+                onSelectTab={() => setActiveTab("Today")}
+              />
+              <ButtonTab
+                label="Tomorrow"
+                isActive={activeTab === "Tomorrow"}
+                onSelectTab={() => setActiveTab("Tomorrow")}
+              />
+              <ButtonTab
+                label="10 days"
+                isActive={activeTab === "10 days"}
+                onSelectTab={() => setActiveTab("10 days")}
+              />
             </nav>
             <div className="grid grid-cols-2 gap-4">
               <SmallCard
                 title="Wind speed"
                 icon={<FaWind />}
-                value={`${weatherData.current.wind_kph}km/h`}
+                value={`${activeDay.windSpeed}km/h`}
               />
               <SmallCard
                 title="Rain chance"
                 icon={<FaCloudShowersHeavy />}
-                value={`${weatherData.forecast.forecastday[0].day.daily_chance_of_rain}%`}
+                value={`${activeDay.rainChance}%`}
               />
               <SmallCard
                 title="Pressure"
                 icon={<FaWater />}
-                value={`${weatherData.current.pressure_mb} Hpa`}
+                value={`${activeDay.pressure} Hpa`}
               />
               <SmallCard
                 title="UV index"
                 icon={<FaSun />}
-                value={`${weatherData.current.uv}`}
+                value={`${activeDay.uv}`}
               />
             </div>
-            <div>
-              <LargeCard title="Hourly forecast" icon={<FaClock />}>
-                <HourlyForecast currentDay={getCurrentDayFormattedData()} />
-              </LargeCard>
-            </div>
-            <div>
-              <LargeCard title="Chance of rain" icon={<FaCloudShowersHeavy />}>
-                <HourlyRainChance currentDay={getCurrentDayFormattedData()} />
-              </LargeCard>
-            </div>
+            <LargeCard title="Hourly forecast" icon={<FaClock />}>
+              <HourlyForecast currentDay={getDayFormattedData()} />
+            </LargeCard>
+            <LargeCard title="Chance of rain" icon={<FaCloudShowersHeavy />}>
+              <HourlyRainChance currentDay={getDayFormattedData()} />
+            </LargeCard>
             <div className="grid grid-cols-2 gap-4">
               <SmallCard
                 title="Humidité"

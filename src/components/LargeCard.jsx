@@ -7,7 +7,7 @@ export default function LargeCard({ title, icon, children }) {
         </div>
         <span>{title}</span>
       </div>
-      <div>{children}</div>
+      {children}
     </div>
   );
 }
