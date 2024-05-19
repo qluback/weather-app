@@ -17,8 +17,9 @@ import HourlyRainChance from "./components/HourlyRainChance";
 import ButtonTab from "./components/ButtonTab";
 
 export default function App() {
+  const tabs = ["Today", "Tomorrow", "10 days"];
   const [weatherData, setWeatherData] = useState(null);
-  const [activeTab, setActiveTab] = useState("Today");
+  const [activeTab, setActiveTab] = useState(tabs[0]);
 
   useEffect(() => {
     fetch(
@@ -103,7 +104,7 @@ export default function App() {
                   Feels like {weatherData.current.feelslike_c.toFixed()}°
                 </span>
               </div>
-              <div className="flex relative w-28 pt-28 mb-[13px]">
+              <div className="flex justify-end relative w-28 pt-28 mb-[13px]">
                 <img
                   src={weatherData.current.condition.icon}
                   alt=""
@@ -121,12 +122,15 @@ export default function App() {
           </section>
           <section className="flex flex-col gap-4 p-4">
             <nav className="grid grid-cols-3 gap-4">
-              <ButtonTab
-                label="Today"
-                isActive={activeTab === "Today"}
-                onSelectTab={() => setActiveTab("Today")}
-              />
-              <ButtonTab
+              {tabs.map(tab => (
+                <ButtonTab
+                  key={tab}
+                  label={tab}
+                  isActive={activeTab === tab}
+                  onSelectTab={() => setActiveTab(tab)}
+                />
+              ))}
+              {/* <ButtonTab
                 label="Tomorrow"
                 isActive={activeTab === "Tomorrow"}
                 onSelectTab={() => setActiveTab("Tomorrow")}
@@ -135,7 +139,7 @@ export default function App() {
                 label="10 days"
                 isActive={activeTab === "10 days"}
                 onSelectTab={() => setActiveTab("10 days")}
-              />
+              /> */}
             </nav>
             <div className="grid grid-cols-2 gap-4">
               <SmallCard
