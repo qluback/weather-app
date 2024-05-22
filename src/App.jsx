@@ -15,24 +15,29 @@ import LargeCard from "./components/LargeCard";
 import HourlyForecast from "./components/HourlyForecast";
 import HourlyRainChance from "./components/HourlyRainChance";
 import ButtonTab from "./components/ButtonTab";
+import { WEATHER_DATA } from "./data/weather-data";
 
 export default function App() {
   const tabs = ["Today", "Tomorrow", "10 days"];
   const [weatherData, setWeatherData] = useState(null);
   const [activeTab, setActiveTab] = useState(tabs[0]);
 
+  // useEffect(() => {
+  //   fetch(
+  //     "http://api.weatherapi.com/v1/forecast.json?key=d22d0081a3db440b964164153241305&q=Paris&days=10&aqi=no&alerts=no"
+  //   )
+  //     .then((res) => {
+  //       return res.json();
+  //     })
+  //     .then((data) => {
+  //       console.log(data);
+  //       setWeatherData(data);
+  //     });
+  // }, []);
+
   useEffect(() => {
-    fetch(
-      "http://api.weatherapi.com/v1/forecast.json?key=d22d0081a3db440b964164153241305&q=Paris&days=10&aqi=no&alerts=no"
-    )
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        console.log(data);
-        setWeatherData(data);
-      });
-  }, []);
+    setWeatherData(WEATHER_DATA[Math.floor(Math.random() * 7)]);
+  }, [])
 
   function getDayFormattedData() {
     const now = new Date();
@@ -63,7 +68,6 @@ export default function App() {
   let activeDay = null;
   if (weatherData !== null ) {
     activeDay = getDayFormattedData();
-    console.log(activeDay);
   }
 
   return (
